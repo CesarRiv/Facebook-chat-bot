@@ -11,8 +11,8 @@ import (
 
 const (
 	verifyToken      = "YOUR_VERIFY_TOKEN"
-	pageAccessToken = "YOUR_PAGE_ACCESS_TOKEN"
-	appSecret       = "YOUR_APP_SECRET"
+	pageAccessToken = "EAADx2yJWYbEBOZCMsMxmWPHzNSswlEVBZC8arP8pXHWSqrHZBN1N9CkAkllAZC2bpTdkb7zspMUQZCAgYabXDtMqSGPddYkpyEZBkeZCdZBWXnCasKfXw6QGQu9AE5VxUfeNxTrefbRXOszqnzDtAsQpeVabZAZBueHHsoLGov98Hz9syPv1fDkQm5XesZAxyxZCGodV"
+	appSecret       = "eaadaa44f419d46ceb3705a1fe25d1ac"
 	port            = "3000"
 )
 
