@@ -10,7 +10,7 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/knuppe/vader"
+	"github.com/cdipaolo/sentiment"
 )
 
 
@@ -103,17 +103,24 @@ func webhook(w http.ResponseWriter, r *http.Request) {
 	textMessage := message.Entry[0].Messaging[0].Message.Text
 
 	// send message to end-user
-	model, err := vader.NewVader("lexicons/en/en.zip")
-	if err != nil {
-		panic(err)
-	}
-	sentimentResult := model.PolarityScores(textMessage)
+	sentimentModel, err := sentiment.Restore()
+    if err != nil {
+        panic(err)
+    }
+	results := sentimentModel.SentimentAnalysis(textMessage, sentiment.English)
 
-	err = sendMessage(message.Entry[0].Messaging[0].Sender.ID, sentimentResult.Sentiment())
-	if err != nil {
-		log.Printf("failed to send message: %v", err)
-	}
 
+	if results.Score > 0 {
+		err = sendMessage(message.Entry[0].Messaging[0].Sender.ID, "Positive")
+		if err != nil {
+			log.Printf("failed to send message: %v", err)
+		}
+	} else{
+		err = sendMessage(message.Entry[0].Messaging[0].Sender.ID, "Negative")
+		if err != nil {
+			log.Printf("failed to send message: %v", err)
+		}
+	}
 	/*
 	err = sendMessage(message.Entry[0].Messaging[0].Sender.ID, "Automatic Reply")
 	if err != nil {
