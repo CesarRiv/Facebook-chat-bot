@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"os"
 )
 
 const (
@@ -144,7 +145,34 @@ func sendMessage(senderId, message string) error {
 	
 	return nil
 }
+func main() {
+	// Read the assigned port from the environment variable
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "3000" // Default to port 3000 if not provided
+	}
 
+	// create the handler
+	handler := http.NewServeMux()
+	handler.HandleFunc("/", webhook)
+
+	// configure http server
+	addr := fmt.Sprintf(":%s", port)
+	srv := &http.Server{
+		Handler: handler,
+		Addr:    addr, // Use the configured port
+	}
+
+	// start http server
+	log.Printf("http server listening at %v", addr)
+	if err := srv.ListenAndServe(); err != nil {
+		log.Fatalf("failed to serve: %v", err)
+	}
+}
+
+
+
+/*
 func main() {
 	// create the handler
 	handler := http.NewServeMux()
@@ -162,3 +190,4 @@ func main() {
 		log.Fatalf("failed to serve: %v", err)
 	}
 }
+*/
