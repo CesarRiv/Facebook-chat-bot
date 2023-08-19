@@ -122,6 +122,10 @@ func webhook(w http.ResponseWriter, r *http.Request) {
 	
 	// Perform sentiment analysis on the text message
 	sentimentResult := model.SentimentAnalysis(textMessage, sentiment.English)
+	if sentimentResult != nil {
+		fmt.Println("Error getting sentiment analysis :", sentimentResult)
+		return
+	}
 
 	if sentimentResult.Score == 0 {
 		err = sendMessage(message.Entry[0].Messaging[0].Sender.ID, "Neuteral")
