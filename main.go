@@ -112,6 +112,12 @@ func webhook(w http.ResponseWriter, r *http.Request) {
 
 	textMessage := message.Entry[0].Messaging[0].Message.Text
 
+	// send message to end-user
+	err = sendMessage(message.Entry[0].Messaging[0].Sender.ID, "Automatic Reply")
+	if err != nil {
+		log.Printf("failed to send message: %v", err)
+	}
+
 	// Perform sentiment analysis on the text message
 	sentimentResult := model.SentimentAnalysis(textMessage, sentiment.English)
 	// Determine the sentiment label based on the sentiment score
@@ -138,11 +144,6 @@ func webhook(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// send message to end-user
-	err = sendMessage(message.Entry[0].Messaging[0].Sender.ID, sentimentLabel)
-	if err != nil {
-		log.Printf("failed to send message: %v", err)
-	}
 
 	return
 }
