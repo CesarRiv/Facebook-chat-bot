@@ -124,9 +124,9 @@ func webhook(w http.ResponseWriter, r *http.Request) {
 		sentimentLabel = "Negative"
 	}
 
-	responseMessage := fmt.Sprintf("Your message sentiment: %s", sentimentLabel)
+	//responseMessage := fmt.Sprintf("Your message sentiment: %s", sentimentLabel)
 
-	err = sendMessage(message.Entry[0].Messaging[0].Sender.ID, responseMessage)
+	err = sendMessage(message.Entry[0].Messaging[0].Sender.ID, "Your message sentiment: %s"+sentimentLabel)
 	if err != nil {
 		log.Printf("Failed to send message: %v", err)
 	}
