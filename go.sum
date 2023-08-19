@@ -8,6 +8,8 @@ github.com/kljensen/snowball v0.8.0 h1:WU4cExxK6sNW33AiGdbn4e8RvloHrhkAssu2mVJ11
 github.com/kljensen/snowball v0.8.0/go.mod h1:OGo5gFWjaeXqCu4iIrMl5OYip9XUJHGOU5eSkPjVg2A=
 github.com/knuppe/vader v1.0.1 h1:eAPAvET1QDEuuJ2KMt06WNQ9JfPp20KEWcv+oX6/1Ws=
 github.com/knuppe/vader v1.0.1/go.mod h1:oGhKheu6kq0a8ahPsnllTk9BPR7ammBSd8Mh+8wg72o=
+github.com/mattn/go-sqlite3 v1.14.17 h1:mCRHCLDUBXgpKAqIKsaAaAsrAlbkeomtRFKXh2L6YIM=
+github.com/mattn/go-sqlite3 v1.14.17/go.mod h1:2eHXhiwb8IkHr+BDWZGa96P6+rkvnG63S2DGjv9HUNg=
 golang.org/x/text v0.3.6 h1:aRYxNxv6iGQlyVaZmk6ZgYEDa+Jg18DxebPSrd6bg1M=
 golang.org/x/text v0.3.6/go.mod h1:5Zoc/QRtKVWzQhOtBMvqHzDpF6irO9z98xDceosuGiQ=
 golang.org/x/text v0.12.0 h1:k+n5B8goJNdU7hSvEtMUz3d1Q6D/XW4COJSJR6fN0mc=

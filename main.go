@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"database/sql"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -11,6 +12,7 @@ import (
 	"os"
 
 	"github.com/cdipaolo/sentiment"
+	_ "github.com/mattn/go-sqlite3"
 )
 
 const (
@@ -51,6 +53,8 @@ type SendMessage struct {
 		Text string `json:"text"`
 	} `json:"message"`
 }
+var db *sql.DB
+
 // webhook is a handler for Webhook server
 func webhook(w http.ResponseWriter, r *http.Request) {
 	// return all with status code 200
@@ -99,20 +103,23 @@ func sendResponseMessage(senderID, message string) {
 		log.Printf("Error initializing sentiment model: %v", err)
 		return
 	}
-
 	results := sentimentModel.SentimentAnalysis(message, sentiment.English)
 	responseMessage := ""
 
 	if results.Score > 0 {
 		responseMessage = "Glad to hear you had a positive experience with our product!"
-	} else if results.Score == 0 {
-		responseMessage = "Thanks for the feedback!"
 	} else {
 		responseMessage = "Sorry to hear your experience wasn't the greatest with our product."
-	}
-
+	} 
 	if err := sendMessage(senderID, responseMessage); err != nil {
 		log.Printf("Failed to send message: %v", err)
+	}
+	_, err = db.Exec(`
+		INSERT INTO responses (sender_id, response_text)
+		VALUES (?, ?)`,
+		senderID, responseMessage)
+	if err != nil {
+		log.Printf("Failed to store response in database: %v", err)
 	}
 }
 // sendMessage sends a message to end-user
@@ -145,8 +152,29 @@ func sendMessage(senderId, message string) error {
 	}
 	defer res.Body.Close()
 	// print response
-	log.Printf("message sent successfully?\n%#v", res)
+	log.Printf("message sent successfully!\n%#v", res)
 	return nil
+}
+func getStoredResponses() {
+	rows, err := db.Query(`
+		SELECT sender_id, response_text, sentiment_score
+		FROM responses`)
+	if err != nil {
+		log.Printf("Failed to retrieve responses: %v", err)
+		return
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var senderID string
+		var responseText string
+		var sentimentScore float64
+		if err := rows.Scan(&senderID, &responseText, &sentimentScore); err != nil {
+			log.Printf("Failed to retrieve row: %v", err)
+			continue
+		}
+		log.Printf("Sender: %s, Response: %s, Score: %f", senderID, responseText, sentimentScore)
+	}
 }
 func main() {
 	// Read the assigned port from the environment variable
@@ -154,6 +182,24 @@ func main() {
 	if port == "" {
 		port = "3000" // Default to port 3000 if not provided
 	}
+	var err error
+	db, err = sql.Open("sqlite3", "responses.db")
+	if err != nil {
+		log.Fatalf("Failed to open database: %v", err)
+	}
+	defer db.Close()
+
+	_, err = db.Exec(`
+		CREATE TABLE IF NOT EXISTS responses (
+			id INTEGER PRIMARY KEY AUTOINCREMENT,
+			sender_id TEXT,
+			response_text TEXT,
+			sentiment_score REAL
+		)`)
+	if err != nil {
+		log.Fatalf("Failed to create table: %v", err)
+	}
+
 	// create the handler
 	handler := http.NewServeMux()
 	handler.HandleFunc("/", webhook)

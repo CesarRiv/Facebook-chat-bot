@@ -8,5 +8,6 @@ require (
 	github.com/huandu/facebook v2.3.1+incompatible // indirect
 	github.com/kljensen/snowball v0.8.0 // indirect
 	github.com/knuppe/vader v1.0.1 // indirect
+	github.com/mattn/go-sqlite3 v1.14.17 // indirect
 	golang.org/x/text v0.12.0 // indirect
 )
