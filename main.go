@@ -10,19 +10,9 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/cdipaolo/sentiment"
+	"github.com/kljensen/snowball"
 )
 
-var model sentiment.Models
-
-func initSentimentModel() error {
-	// Initialize the sentiment analysis model
-	_, err := sentiment.Restore()
-	if err != nil {
-		return err
-	}
-	return nil
-}
 
 const (
 	// VERIFY_TOKEN use to verify the incoming request
@@ -110,14 +100,26 @@ func webhook(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	//textMessage := message.Entry[0].Messaging[0].Message.Text
+	textMessage := message.Entry[0].Messaging[0].Message.Text
 
 	// send message to end-user
 
+	sentimentResult, err := snowball.Stem(textMessage, "english", true)
+	if err == nil{
+		log.Printf("failed to send message: %v", err)
+	}
+
+	err = sendMessage(message.Entry[0].Messaging[0].Sender.ID, sentimentResult)
+	if err != nil {
+		log.Printf("failed to send message: %v", err)
+	}
+
+	/*
 	err = sendMessage(message.Entry[0].Messaging[0].Sender.ID, "Automatic Reply")
 	if err != nil {
 		log.Printf("failed to send message: %v", err)
 	}
+	*/
 	
 	/*
 	// Perform sentiment analysis on the text message
@@ -213,12 +215,6 @@ func sendMessage(senderId, message string) error {
 	return nil
 }
 func main() {
-	
-	err := initSentimentModel()
-	if err != nil {
-		log.Printf("Error initializing sentiment analysis model: %v", err)
-		return
-	}
 	
 	// Read the assigned port from the environment variable
 	port := os.Getenv("PORT")
