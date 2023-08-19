@@ -14,7 +14,7 @@ const (
 	// VERIFY_TOKEN use to verify the incoming request
 	VERIFY_TOKEN = "12345"
 	// ACCESS_TOKEN use to access Messenger API
-	ACCESS_TOKEN = "EAARAP9jG4DEBAFSWgLZBwhMy5qqt2Q0AZCQVbDZCFYEBhIsBHYqQ7aWvCHaAbK7NCbVJ7xOQoequylO2hPjv0xCaT4GCdyL1oqsEaDmTaC0fF3pj1kbtO0A9XeAG20i5va0uHEuoqOmSPPimElLuDk09ZBfOsFZAeGfhfG97sLxdX5WZCGDZB5CZCIQJqRFxtYkZD"
+	ACCESS_TOKEN = "EAADx2yJWYbEBO3ZAMdGbCaVxIPbyF9yo5kZBNHGMh2eIMVgEGHJKqNc5LpE5bv9Y25e0tFVk0znjePJeN50iyj4shDHkqig9QffdukMiXSgpTgZCeggZAc7RGS0JE3OEu8J6Kq0KN3af1ZCKUdAUL8DDVYVUBmS9ChuUci9n1i8Qaawfynhfgy3NE7UmBW27b"
 	// GRAPHQL_URL is a base URL v12.0 for Messenger API
 	GRAPHQL_URL = "https://graph.facebook.com/v12.0"
 )
@@ -97,7 +97,7 @@ func webhook(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// send message to end-user
-	err = sendMessage(message.Entry[0].Messaging[0].Sender.ID, "Automatically Reply 🙌🏻")
+	err = sendMessage(message.Entry[0].Messaging[0].Sender.ID, "Automatically Reply ")
 	if err != nil {
 		log.Printf("failed to send message: %v", err)
 	}
