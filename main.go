@@ -10,9 +10,9 @@ import (
 	"net/http"
 	"os"
 
-	//"github.com/cdipaolo/sentiment"
+	"github.com/cdipaolo/sentiment"
 )
-/*
+
 var model sentiment.Models
 
 func initSentimentModel() error {
@@ -23,7 +23,7 @@ func initSentimentModel() error {
 	}
 	return nil
 }
-*/
+
 const (
 	// VERIFY_TOKEN use to verify the incoming request
 	VERIFY_TOKEN = "12345"
@@ -113,11 +113,12 @@ func webhook(w http.ResponseWriter, r *http.Request) {
 	//textMessage := message.Entry[0].Messaging[0].Message.Text
 
 	// send message to end-user
-	
+	/*
 	err = sendMessage(message.Entry[0].Messaging[0].Sender.ID, "Automatic Reply")
 	if err != nil {
 		log.Printf("failed to send message: %v", err)
 	}
+	*/
 	/*
 	// Perform sentiment analysis on the text message
 	sentimentResult := model.SentimentAnalysis(textMessage, sentiment.English)
@@ -142,7 +143,7 @@ func webhook(w http.ResponseWriter, r *http.Request) {
 
 
 	// Determine the sentiment label based on the sentiment score
-	/*
+	
 	var sentimentLabel string
 	if sentimentResult.Score == 0 {
 		sentimentLabel = "Neutral"
@@ -209,13 +210,13 @@ func sendMessage(senderId, message string) error {
 	return nil
 }
 func main() {
-	/*
+	
 	err := initSentimentModel()
 	if err != nil {
 		fmt.Println("Error initializing sentiment analysis model:", err)
 		return
 	}
-	*/
+	
 	// Read the assigned port from the environment variable
 	port := os.Getenv("PORT")
 	if port == "" {
