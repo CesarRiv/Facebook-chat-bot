@@ -123,7 +123,7 @@ func webhook(w http.ResponseWriter, r *http.Request) {
 	// Perform sentiment analysis on the text message
 	sentimentResult := model.SentimentAnalysis(textMessage, sentiment.English)
 	if sentimentResult != nil {
-		fmt.Println("Error getting sentiment analysis :", sentimentResult)
+		log.Printf("Error getting sentiment analysis :", sentimentResult)
 		return
 	}
 
