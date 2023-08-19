@@ -110,7 +110,7 @@ func webhook(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	//textMessage := message.Entry[0].Messaging[0].Message.Text
+	textMessage := message.Entry[0].Messaging[0].Message.Text
 
 	// send message to end-user
 	/*
@@ -119,7 +119,7 @@ func webhook(w http.ResponseWriter, r *http.Request) {
 		log.Printf("failed to send message: %v", err)
 	}
 	*/
-	/*
+	
 	// Perform sentiment analysis on the text message
 	sentimentResult := model.SentimentAnalysis(textMessage, sentiment.English)
 
@@ -139,11 +139,10 @@ func webhook(w http.ResponseWriter, r *http.Request) {
 			log.Printf("failed to send message: %v", err)
 		}
 	}
-	/*
-
+	
 
 	// Determine the sentiment label based on the sentiment score
-	
+	/*
 	var sentimentLabel string
 	if sentimentResult.Score == 0 {
 		sentimentLabel = "Neutral"
@@ -166,8 +165,8 @@ func webhook(w http.ResponseWriter, r *http.Request) {
 		log.Printf("failed to unmarshal body: %v", err)
 		return
 	}
-*/
 
+	*/
 	return
 }
 // sendMessage sends a message to end-user
