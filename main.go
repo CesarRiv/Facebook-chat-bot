@@ -124,30 +124,28 @@ func webhook(w http.ResponseWriter, r *http.Request) {
 		sentimentLabel = "Negative"
 	}
 
-	//responseMessage := fmt.Sprintf("Your message sentiment: %s", sentimentLabel)
+	responseMessage := fmt.Sprintf("Your message sentiment: %s", sentimentLabel)
 
-	err = sendMessage(message.Entry[0].Messaging[0].Sender.ID, "Your message sentiment: %s"+sentimentLabel)
+	err = sendMessage(message.Entry[0].Messaging[0].Sender.ID, responseMessage)
 	if err != nil {
 		log.Printf("Failed to send message: %v", err)
 	}
 
-	return
-}
-	/*
+
+
 	if err := json.Unmarshal(body, &message); err != nil {
 		log.Printf("failed to unmarshal body: %v", err)
 		return
 	}
 
 	// send message to end-user
-	err = sendMessage(message.Entry[0].Messaging[0].Sender.ID, "Automatically Reply ")
+	err = sendMessage(message.Entry[0].Messaging[0].Sender.ID, sentimentLabel)
 	if err != nil {
 		log.Printf("failed to send message: %v", err)
 	}
 
 	return
 }
-*/
 // sendMessage sends a message to end-user
 func sendMessage(senderId, message string) error {
 	// configure the sender ID and message
