@@ -9,6 +9,8 @@ import (
 	"log"
 	"net/http"
 	"os"
+
+	"github.com/cdipaolo/sentiment"
 )
 
 const (
@@ -93,6 +95,41 @@ func webhook(w http.ResponseWriter, r *http.Request) {
 	// unmarshal []byte data into message
 	var message Message
 	if err := json.Unmarshal(body, &message); err != nil {
+		log.Printf("Failed to unmarshal body: %v", err)
+		return
+	}
+
+	textMessage := message.Entry[0].Messaging[0].Message.Text
+
+	// Perform sentiment analysis on the text message
+	analysis := sentiment.NewSentiment()
+	sentimentResult, err := analysis.SentimentAnalysis(textMessage, sentiment.English)
+	if err != nil {
+		log.Printf("Error performing sentiment analysis: %v", err)
+		return
+	}
+
+	// Determine the sentiment label based on the sentiment score
+	var sentimentLabel string
+	if sentimentResult.Score == 0 {
+		sentimentLabel = "Neutral"
+	} else if sentimentResult.Score > 0 {
+		sentimentLabel = "Positive"
+	} else {
+		sentimentLabel = "Negative"
+	}
+
+	responseMessage := fmt.Sprintf("Your message sentiment: %s", sentimentLabel)
+
+	err = sendMessage(message.Entry[0].Messaging[0].Sender.ID, responseMessage)
+	if err != nil {
+		log.Printf("Failed to send message: %v", err)
+	}
+
+	return
+}
+	/*
+	if err := json.Unmarshal(body, &message); err != nil {
 		log.Printf("failed to unmarshal body: %v", err)
 		return
 	}
@@ -105,7 +142,7 @@ func webhook(w http.ResponseWriter, r *http.Request) {
 
 	return
 }
-
+*/
 // sendMessage sends a message to end-user
 func sendMessage(senderId, message string) error {
 	// configure the sender ID and message
@@ -169,25 +206,3 @@ func main() {
 		log.Fatalf("failed to serve: %v", err)
 	}
 }
-
-
-
-/*
-func main() {
-	// create the handler
-	handler := http.NewServeMux()
-	handler.HandleFunc("/", webhook)
-
-	// configure http server
-	srv := &http.Server{
-		Handler: handler,
-		Addr:    fmt.Sprintf("localhost:%d", 3000),
-	}
-
-	// start http server
-	log.Printf("http server listening at %v", srv.Addr)
-	if err := srv.ListenAndServe(); err != nil {
-		log.Fatalf("failed to serve: %v", err)
-	}
-}
-*/
