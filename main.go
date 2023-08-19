@@ -10,7 +10,7 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/kljensen/snowball"
+	"github.com/knuppe/vader"
 )
 
 
@@ -103,13 +103,13 @@ func webhook(w http.ResponseWriter, r *http.Request) {
 	textMessage := message.Entry[0].Messaging[0].Message.Text
 
 	// send message to end-user
-
-	sentimentResult, err := snowball.Stem(textMessage, "english", true)
-	if err == nil{
-		log.Printf("failed to send message: %v", err)
+	model, err := vader.NewVader("lexicons/en/en.zip")
+	if err != nil {
+		panic(err)
 	}
+	sentimentResult := model.PolarityScores(textMessage)
 
-	err = sendMessage(message.Entry[0].Messaging[0].Sender.ID, sentimentResult)
+	err = sendMessage(message.Entry[0].Messaging[0].Sender.ID, sentimentResult.Sentiment())
 	if err != nil {
 		log.Printf("failed to send message: %v", err)
 	}
@@ -120,7 +120,7 @@ func webhook(w http.ResponseWriter, r *http.Request) {
 		log.Printf("failed to send message: %v", err)
 	}
 	*/
-	
+
 	/*
 	// Perform sentiment analysis on the text message
 	sentimentResult := model.SentimentAnalysis(textMessage, sentiment.English)
@@ -215,6 +215,7 @@ func sendMessage(senderId, message string) error {
 	return nil
 }
 func main() {
+
 	
 	// Read the assigned port from the environment variable
 	port := os.Getenv("PORT")
