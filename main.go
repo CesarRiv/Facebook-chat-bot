@@ -54,6 +54,11 @@ type SendMessage struct {
 	} `json:"message"`
 }
 var db *sql.DB
+// Dummy function to simulate whether the user recently completed a transaction
+func recentlyCompletedTransaction() bool {
+	// Replace this with your actual logic to determine if the user completed a transaction
+	return true // Change this value as needed
+}
 
 // webhook is a handler for Webhook server
 func webhook(w http.ResponseWriter, r *http.Request) {
@@ -98,26 +103,40 @@ func webhook(w http.ResponseWriter, r *http.Request) {
 	sendResponseMessage(message.Entry[0].Messaging[0].Sender.ID, textMessage)
 }
 func sendResponseMessage(senderID, message string) {
+	// Restore the sentiment model
 	sentimentModel, err := sentiment.Restore()
 	if err != nil {
 		log.Printf("Error initializing sentiment model: %v", err)
 		return
 	}
+	// Determine if the user recently completed a transaction
+	completedTransaction := recentlyCompletedTransaction()
+
+	// Convert the boolean to an integer (0 or 1)
+	var completedTransactionInt int
+	if completedTransaction {
+		completedTransactionInt = 1
+	} else {
+		completedTransactionInt = 0
+	}
+	// Analyze sentiment of the incoming message
 	results := sentimentModel.SentimentAnalysis(message, sentiment.English)
 	responseMessage := ""
-
-	if results.Score > 0 {
-		responseMessage = "Glad to hear you had a positive experience with our product!"
-	} else {
-		responseMessage = "Sorry to hear your experience wasn't the greatest with our product."
+	// Determine the response message based on sentiment score
+	if results.Score > 0 && completedTransactionInt == 1 {
+		responseMessage = "Thank you for recently purchashing with us and I am glad to hear you had a positive experience with our product!"
+	} else if results.Score < 0 && completedTransactionInt == 1 {
+		responseMessage = "Thank you for recently purchashing with us and I am sorry to hear your experience wasn't the greatest with our product."
 	} 
+	// Send the response message to the user
 	if err := sendMessage(senderID, responseMessage); err != nil {
 		log.Printf("Failed to send message: %v", err)
 	}
+	// Store the response in the database
 	_, err = db.Exec(`
-		INSERT INTO responses (sender_id, response_text)
-		VALUES (?, ?)`,
-		senderID, responseMessage)
+		INSERT INTO responses (sender_id, response_text, completed_transaction)
+		VALUES (?, ?, ?)`,
+		senderID, responseMessage, completedTransactionInt)
 	if err != nil {
 		log.Printf("Failed to store response in database: %v", err)
 	}
@@ -156,24 +175,27 @@ func sendMessage(senderId, message string) error {
 	return nil
 }
 func getStoredResponses() {
+	// Query the database to retrieve stored sender IDs and response text
 	rows, err := db.Query(`
-		SELECT sender_id, response_text, sentiment_score
+		SELECT sender_id, response_text
 		FROM responses`)
 	if err != nil {
 		log.Printf("Failed to retrieve responses: %v", err)
 		return
 	}
-	defer rows.Close()
+	defer rows.Close() // Ensure the rows are closed when we're done with them
 
+	// Iterate through the retrieved rows
 	for rows.Next() {
 		var senderID string
 		var responseText string
-		var sentimentScore float64
-		if err := rows.Scan(&senderID, &responseText, &sentimentScore); err != nil {
+		// Scan the values from the current row into variables
+		if err := rows.Scan(&senderID, &responseText); err != nil {
 			log.Printf("Failed to retrieve row: %v", err)
-			continue
+			continue // Continue to the next row in case of an error
 		}
-		log.Printf("Sender: %s, Response: %s, Score: %f", senderID, responseText, sentimentScore)
+		// Print the retrieved sender ID and response text
+		log.Printf("Sender: %s, Response: %s", senderID, responseText)
 	}
 }
 func main() {
@@ -182,19 +204,20 @@ func main() {
 	if port == "" {
 		port = "3000" // Default to port 3000 if not provided
 	}
+	// Open the SQLite database with the specified file name "responses.db"
 	var err error
 	db, err = sql.Open("sqlite3", "responses.db")
 	if err != nil {
 		log.Fatalf("Failed to open database: %v", err)
 	}
-	defer db.Close()
+	defer db.Close() // Ensure the database is closed when we're done with it
 
 	_, err = db.Exec(`
 		CREATE TABLE IF NOT EXISTS responses (
 			id INTEGER PRIMARY KEY AUTOINCREMENT,
 			sender_id TEXT,
 			response_text TEXT,
-			sentiment_score REAL
+			completed_transaction INTEGER
 		)`)
 	if err != nil {
 		log.Fatalf("Failed to create table: %v", err)
