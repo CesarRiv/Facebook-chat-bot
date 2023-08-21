@@ -110,13 +110,40 @@ func webhook(w http.ResponseWriter, r *http.Request) {
 	textMessage := message.Entry[0].Messaging[0].Message.Text
 	sendResponseMessage(message.Entry[0].Messaging[0].Sender.ID, textMessage)
 }
-func sendResponseMessage(senderID, message string) {
+// determineResponseMessage determines the response message based on sentiment and completed transaction status.
+func determineResponseMessage(message string, completedTransaction bool) string {
 	// Restore the sentiment model
 	sentimentModel, err := sentiment.Restore()
 	if err != nil {
 		log.Printf("Error initializing sentiment model: %v", err)
-		return
+		return "Error when initializing sentiment model"
 	}
+	
+	responseMessage := ""
+	completedTransactionInt := 0 // Default to 0
+
+	results := sentimentModel.SentimentAnalysis(message, sentiment.English)
+
+	// Convert the boolean to an integer (0 or 1)
+	if completedTransaction {
+		completedTransactionInt = 1
+	}
+
+	if results.Score > 0 && completedTransactionInt == 1 {
+		responseMessage = "Thank you for recently purchasing with us and I am glad to hear you had a positive experience with our product!"
+	} else if results.Score < 0 && completedTransactionInt == 1 {
+		responseMessage = "Thank you for recently purchasing with us and I am sorry to hear your experience wasn't the greatest with our product."
+	} else if results.Score > 0 && completedTransactionInt == 0 {
+		responseMessage = "Seems like there is no recent transaction tied with your account, what is the product you purchased which you had a positive experience with?"
+		completedTransactionInt = 1
+	} else {
+		responseMessage = "Seems like there is no recent transaction tied with your account, what is the product you purchased which you had a negative experience with?"
+		completedTransactionInt = 1
+	}
+
+	return responseMessage
+}
+func sendResponseMessage(senderID, message string) {
 	// Determine if the user recently completed a transaction
 	completedTransaction := recentlyCompletedTransaction()
 	completedTransactionInt := 0 // Default to 0
@@ -126,24 +153,28 @@ func sendResponseMessage(senderID, message string) {
 		completedTransactionInt = 1
 	}
 	// Analyze sentiment of the incoming message
-	results := sentimentModel.SentimentAnalysis(message, sentiment.English)
-	responseMessage := ""
+	//results := sentimentModel.SentimentAnalysis(message, sentiment.English)
+	responseMessage := determineResponseMessage(message, completedTransaction)
+	/*
 	// Determine the response message based on sentiment score
 	if results.Score > 0 && completedTransactionInt == 1 {
-		responseMessage = "Thank you for recently purchashing with us and I am glad to hear you had a positive experience with our product!"
+		responseMessage = "Thank you for recently purchasing with us and I am glad to hear you had a positive experience with our product!"
 	} else if results.Score < 0 && completedTransactionInt == 1 {
-		responseMessage = "Thank you for recently purchashing with us and I am sorry to hear your experience wasn't the greatest with our product."
+		responseMessage = "Thank you for recently purchasing with us and I am sorry to hear your experience wasn't the greatest with our product."
 	} else if results.Score > 0 && completedTransactionInt == 0 {
 		responseMessage = "Seems like there is no recent transaction tied with your account, what is the product you purchased which you had a positive experience with?"
+		completedTransactionInt = 1
 	} else {
 		responseMessage = "Seems like there is no recent transaction tied with your account, what is the product you purchased which you had a negative experience with?"
+		completedTransactionInt = 1
 	}
+	*/
 	// Send the response message to the user
 	if err := sendMessage(senderID, responseMessage); err != nil {
 		log.Printf("Failed to send message: %v", err)
 	}
 	// Store the response in the database
-	_, err = db.Exec(`
+	_, err := db.Exec(`
 		INSERT INTO responses (sender_id, response_text, completed_transaction)
 		VALUES (?, ?, ?)`,
 		senderID, responseMessage, completedTransactionInt)
