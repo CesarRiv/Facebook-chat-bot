@@ -184,7 +184,9 @@ func sendMessage(senderId, message string) error {
 	log.Printf("message sent successfully!\n%#v", res)
 	return nil
 }
+// getStoredResponses retrieves stored responses from the database and logs them.
 func getStoredResponses() {
+	// Query the database to retrieve sender IDs, response texts, and completed transaction status
 	rows, err := db.Query(`
 		SELECT sender_id, response_text, completed_transaction
 		FROM responses`)
@@ -192,16 +194,18 @@ func getStoredResponses() {
 		log.Printf("Failed to retrieve responses: %v", err)
 		return
 	}
-	defer rows.Close()
-
+	defer rows.Close() // Ensure the rows are closed when done with them
+	// Iterate through the retrieved rows
 	for rows.Next() {
 		var senderID string
 		var responseText string
 		var completedTransaction int
+		// Attempt to scan the values from the current row into variables
 		if err := rows.Scan(&senderID, &responseText, &completedTransaction); err != nil {
 			log.Printf("Failed to retrieve row: %v", err)
-			continue
+			continue // Continue to the next row in case of an error
 		}
+		// Log the retrieved sender ID, response text, and completed transaction status
 		log.Printf("Sender: %s, Response: %s, Completed Transaction: %d", senderID, responseText, completedTransaction)
 	}
 }
