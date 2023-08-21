@@ -10,6 +10,8 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"math/rand"
+	"time"
 
 	"github.com/cdipaolo/sentiment"
 	_ "github.com/mattn/go-sqlite3"
@@ -54,10 +56,16 @@ type SendMessage struct {
 	} `json:"message"`
 }
 var db *sql.DB
-// Dummy function to simulate whether the user recently completed a transaction
+func init() {
+	rand.Seed(time.Now().UnixNano())
+}
+
+// Function to randomly determine if the user recently completed a transaction
 func recentlyCompletedTransaction() bool {
-	// Replace this with your actual logic to determine if the user completed a transaction
-	return true // Change this value as needed
+	// Generate a random number between 0 and 1
+	// If the number is greater than or equal to 0.5, return true
+	// Otherwise, return false
+	return rand.Float64() >= 0.5
 }
 
 // webhook is a handler for Webhook server
@@ -111,13 +119,11 @@ func sendResponseMessage(senderID, message string) {
 	}
 	// Determine if the user recently completed a transaction
 	completedTransaction := recentlyCompletedTransaction()
+	completedTransactionInt := 0 // Default to 0
 
 	// Convert the boolean to an integer (0 or 1)
-	var completedTransactionInt int
 	if completedTransaction {
 		completedTransactionInt = 1
-	} else {
-		completedTransactionInt = 0
 	}
 	// Analyze sentiment of the incoming message
 	results := sentimentModel.SentimentAnalysis(message, sentiment.English)
@@ -127,7 +133,11 @@ func sendResponseMessage(senderID, message string) {
 		responseMessage = "Thank you for recently purchashing with us and I am glad to hear you had a positive experience with our product!"
 	} else if results.Score < 0 && completedTransactionInt == 1 {
 		responseMessage = "Thank you for recently purchashing with us and I am sorry to hear your experience wasn't the greatest with our product."
-	} 
+	} else if results.Score > 0 && completedTransactionInt == 0 {
+		responseMessage = "Seems like there is no recent transaction tied with your account, what is the product you purchased which you had a positive experience with?"
+	} else {
+		responseMessage = "Seems like there is no recent transaction tied with your account, what is the product you purchased which you had a negative experience with?"
+	}
 	// Send the response message to the user
 	if err := sendMessage(senderID, responseMessage); err != nil {
 		log.Printf("Failed to send message: %v", err)
@@ -175,27 +185,24 @@ func sendMessage(senderId, message string) error {
 	return nil
 }
 func getStoredResponses() {
-	// Query the database to retrieve stored sender IDs and response text
 	rows, err := db.Query(`
-		SELECT sender_id, response_text
+		SELECT sender_id, response_text, completed_transaction
 		FROM responses`)
 	if err != nil {
 		log.Printf("Failed to retrieve responses: %v", err)
 		return
 	}
-	defer rows.Close() // Ensure the rows are closed when we're done with them
+	defer rows.Close()
 
-	// Iterate through the retrieved rows
 	for rows.Next() {
 		var senderID string
 		var responseText string
-		// Scan the values from the current row into variables
-		if err := rows.Scan(&senderID, &responseText); err != nil {
+		var completedTransaction int
+		if err := rows.Scan(&senderID, &responseText, &completedTransaction); err != nil {
 			log.Printf("Failed to retrieve row: %v", err)
-			continue // Continue to the next row in case of an error
+			continue
 		}
-		// Print the retrieved sender ID and response text
-		log.Printf("Sender: %s, Response: %s", senderID, responseText)
+		log.Printf("Sender: %s, Response: %s, Completed Transaction: %d", senderID, responseText, completedTransaction)
 	}
 }
 func main() {
