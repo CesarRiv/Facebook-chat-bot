@@ -133,14 +133,14 @@ func determineResponseMessage(senderID ,message string, completedTransaction boo
 		log.Printf("Failed to send message: %v", err)
 	}
 
-	if results.Score > 0 && completedTransactionInt == 1 {
+	if results.Score == 1 && completedTransactionInt == 1 {
 		responseMessage = "Thank you for recently purchasing with us and I am glad to hear you had a positive experience with our product!"
-	} else if results.Score < 0 && completedTransactionInt == 1 {
+	} else if results.Score == 0 && completedTransactionInt == 1 {
 		responseMessage = "Thank you for recently purchasing with us and I am sorry to hear your experience wasn't the greatest with our product."
-	} else if results.Score > 0 && completedTransactionInt == 0 {
+	} else if results.Score == 1 && completedTransactionInt == 0 {
 		responseMessage = "Seems like there is no recent transaction tied with your account, what is the product you purchased which you had a positive experience with?"
 		completedTransactionInt = 1
-	} else if results.Score < 0 && completedTransactionInt == 0{
+	} else if results.Score == 0 && completedTransactionInt == 0{
 		responseMessage = "Seems like there is no recent transaction tied with your account, what is the product you purchased which you had a negative experience with?"
 		completedTransactionInt = 1
 	}
