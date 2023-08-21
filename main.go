@@ -128,6 +128,8 @@ func determineResponseMessage(message string, completedTransaction bool) string 
 	if completedTransaction {
 		completedTransactionInt = 1
 	}
+	
+
 
 	if results.Score > 0 && completedTransactionInt == 1 {
 		responseMessage = "Thank you for recently purchasing with us and I am glad to hear you had a positive experience with our product!"
@@ -151,7 +153,12 @@ func sendResponseMessage(senderID, message string) {
 	// Convert the boolean to an integer (0 or 1)
 	if completedTransaction {
 		completedTransactionInt = 1
+		// Send the response message to the user
+		if err := sendMessage(senderID, "1"); err != nil {
+			log.Printf("Failed to send message: %v", err)
+		}
 	}
+
 	// Analyze sentiment of the incoming message
 	//results := sentimentModel.SentimentAnalysis(message, sentiment.English)
 	responseMessage := determineResponseMessage(message, completedTransaction)
