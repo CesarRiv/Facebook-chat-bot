@@ -111,7 +111,7 @@ func webhook(w http.ResponseWriter, r *http.Request) {
 	sendResponseMessage(message.Entry[0].Messaging[0].Sender.ID, textMessage)
 }
 // determineResponseMessage determines the response message based on sentiment and completed transaction status.
-func determineResponseMessage(message string, completedTransaction bool) string {
+func determineResponseMessage(senderID ,message string, completedTransaction bool) string {
 	// Restore the sentiment model
 	sentimentModel, err := sentiment.Restore()
 	if err != nil {
@@ -129,7 +129,9 @@ func determineResponseMessage(message string, completedTransaction bool) string 
 		completedTransactionInt = 1
 	}
 	
-
+	if err := sendMessage(senderID, fmt.Sprintf("%d", results.Score)); err != nil {
+		log.Printf("Failed to send message: %v", err)
+	}
 
 	if results.Score > 0 && completedTransactionInt == 1 {
 		responseMessage = "Thank you for recently purchasing with us and I am glad to hear you had a positive experience with our product!"
@@ -161,7 +163,7 @@ func sendResponseMessage(senderID, message string) {
 
 	// Analyze sentiment of the incoming message
 	//results := sentimentModel.SentimentAnalysis(message, sentiment.English)
-	responseMessage := determineResponseMessage(message, completedTransaction)
+	responseMessage := determineResponseMessage(senderID,message, completedTransaction)
 	/*
 	// Determine the response message based on sentiment score
 	if results.Score > 0 && completedTransactionInt == 1 {
