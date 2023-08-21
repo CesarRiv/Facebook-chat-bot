@@ -138,7 +138,7 @@ func determineResponseMessage(message string, completedTransaction bool) string 
 	} else if results.Score > 0 && completedTransactionInt == 0 {
 		responseMessage = "Seems like there is no recent transaction tied with your account, what is the product you purchased which you had a positive experience with?"
 		completedTransactionInt = 1
-	} else {
+	} else if results.Score < 0 && completedTransactionInt == 0{
 		responseMessage = "Seems like there is no recent transaction tied with your account, what is the product you purchased which you had a negative experience with?"
 		completedTransactionInt = 1
 	}
