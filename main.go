@@ -11,7 +11,6 @@ import (
 	"net/http"
 	"os"
 	"math/rand"
-	"time"
 
 	"github.com/cdipaolo/sentiment"
 	_ "github.com/mattn/go-sqlite3"
@@ -56,10 +55,11 @@ type SendMessage struct {
 	} `json:"message"`
 }
 var db *sql.DB
+/*
 func init() {
 	rand.Seed(time.Now().UnixNano())
 }
-
+*/
 // Function to randomly determine if the user recently completed a transaction
 func recentlyCompletedTransaction() bool {
 	// Generate a random number between 0 and 1
@@ -118,7 +118,6 @@ func determineResponseMessage(message string, completedTransaction bool) string 
 		log.Printf("Error initializing sentiment model: %v", err)
 		return "Error when initializing sentiment model"
 	}
-	
 	responseMessage := ""
 	completedTransactionInt := 0 // Default to 0
 	//Calling model to do sentimental analysis
