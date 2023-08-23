@@ -55,11 +55,7 @@ type SendMessage struct {
 	} `json:"message"`
 }
 var db *sql.DB
-/*
-func init() {
-	rand.Seed(time.Now().UnixNano())
-}
-*/
+
 // Function to randomly determine if the user recently completed a transaction
 func recentlyCompletedTransaction() bool {
 	// Generate a random number between 0 and 1
