@@ -6,7 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
+	"io/ioutil" 
 	"log"
 	"net/http"
 	"os"
@@ -20,7 +20,7 @@ const (
 	// VERIFY_TOKEN use to verify the incoming request
 	VERIFY_TOKEN = "12345"
 	// ACCESS_TOKEN use to access Messenger API
-	ACCESS_TOKEN = "EAADx2yJWYbEBO3ZAMdGbCaVxIPbyF9yo5kZBNHGMh2eIMVgEGHJKqNc5LpE5bv9Y25e0tFVk0znjePJeN50iyj4shDHkqig9QffdukMiXSgpTgZCeggZAc7RGS0JE3OEu8J6Kq0KN3af1ZCKUdAUL8DDVYVUBmS9ChuUci9n1i8Qaawfynhfgy3NE7UmBW27b"
+	ACCESS_TOKEN = ""
 	// GRAPHQL_URL is a base URL v12.0 for Messenger API
 	GRAPHQL_URL = "https://graph.facebook.com/v12.0"
 )
@@ -55,7 +55,6 @@ type SendMessage struct {
 	} `json:"message"`
 }
 var db *sql.DB
-
 // Function to randomly determine if the user recently completed a transaction
 func recentlyCompletedTransaction() bool {
 	// Generate a random number between 0 and 1
@@ -63,7 +62,6 @@ func recentlyCompletedTransaction() bool {
 	// Otherwise, return false
 	return rand.Float64() >= 0.5
 }
-
 // webhook is a handler for Webhook server
 func webhook(w http.ResponseWriter, r *http.Request) {
 	// return all with status code 200
