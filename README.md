@@ -9,9 +9,3 @@ This project is a Facebook Messenger chatbot built in Go (Golang) that uses sent
 - Generates responses based on the sentiment score and whether the user recently completed a transaction.
 - Stores user responses and completed transaction status in an SQLite database.
 - Sends response messages to users via the Messenger API.
-
-## Prerequisites
-
-- Go (Golang) programming language installed on your system.
-- Access to the Facebook Messenger API.
-- A verified Facebook app with webhook set up to receive messages.
