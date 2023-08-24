@@ -87,8 +87,9 @@ func webhook(w http.ResponseWriter, r *http.Request) {
 		// write string from challenge query parameter
 		if _, err := w.Write([]byte(r.URL.Query().Get("hub.challenge"))); err != nil {
 			log.Printf("failed to write response body: %v", err)
+			return
 		}
-		return
+		
 	}
 	// ready body in the request
 	body, err := ioutil.ReadAll(r.Body)
